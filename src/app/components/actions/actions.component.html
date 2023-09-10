@@ -1,9 +1,9 @@
 <div class="filter-container">
-  <!-- <button mat-raised-button color="primary" (click)="actualWeekData()">Esta semana</button>
-  <button mat-raised-button color="accent" (click)="nextWeekData(true)">Semana que viene</button> -->
+  <button mat-raised-button color="primary" (click)="getWeekData()">Esta semana</button>
+  <button mat-raised-button color="accent" (click)="getWeekData(true)">Semana que viene</button>
 </div>
 
-<div class="filter-container" [formGroup]="formGroup">
+<div *ngIf="formGroup" class="filter-container" [formGroup]="formGroup">
   <mat-form-field appearance="fill">
     <mat-label>Actividades</mat-label>
     <mat-select formControlName="activities" multiple>

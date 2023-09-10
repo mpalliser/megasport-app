@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { Component } from '@angular/core'
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms'
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms'
 import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
@@ -23,14 +23,11 @@ import { EventsService } from 'src/app/services/events.service'
   ],
   selector: 'app-actions',
   templateUrl: './actions.component.html',
-  styleUrls: ['./actions.component.sass']
+  styleUrls: ['./actions.component.sass'],
 })
 export class ActionsComponent {
-  public formGroup: FormGroup = new FormGroup({
-    activities: new FormControl(),
-    rooms: new FormControl()
-  })
-  
+  public formGroup: FormGroup | undefined
+
   get filterOptions(): Filters {
     return this.eventsService.filterOptions
   }
@@ -40,8 +37,12 @@ export class ActionsComponent {
     private readonly formBuilder: FormBuilder,
     private readonly cookieService: CookieService,
   ) {
-    this.eventsService.endpointCall() // TODO: review this to do in app module
+    this.getWeekData()
     this.initForm()
+  }
+
+  public getWeekData(isNextWeek = false): void {
+    this.eventsService.getWeekData(isNextWeek)
   }
 
   private initForm(): void {

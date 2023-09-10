@@ -3,30 +3,20 @@
 
     <ng-container *ngFor="let day of columns" [matColumnDef]="day" [sticky]="day === 'hour'">
       <th mat-header-cell *matHeaderCellDef color="primary">
-        {{ day !== 'hour' ? day : (columns[1] | date:'MMMM') }}
+        {{ day !== 'hour' ? day : (columns[1] | date: 'MMMM') }}
       </th>
       <td mat-cell *matCellDef="let element">
         <ng-container *ngIf="day !== 'hour';else hourColumn">
-          <div class="collapsed-container" style="min-width: 243px">
+          <div class="cell-container">
             <ng-container *ngFor="let event of element[day]">
 
-              <!-- collapsed events -->
-              <ng-container *ngIf="!element.collapsed || !event.collapsed; else collapsed">
-                <mat-card (click)="event.collapsed = true"
-                  [ngStyle]="{ 'background-color': event.color, 'padding': '.5rem' }">
-                  <b>{{event.activityName + ' - ' + event.duration + 'min'}}</b>
-                  <span>{{event.instructor}}</span>
-                  <div class="event-description">
-                    {{event.room}}
-                  </div>
-                </mat-card>
+              <ng-container *ngIf="!element.collapsed; else collapsed">
+                <!-- expanded events -->
+                <app-card [event]="event"></app-card>
               </ng-container>
-
-              <!-- expanded events -->
+              <!-- collapsed events -->
               <ng-template #collapsed>
-                <div class="collapsed-event" (click)="event.collapsed = false"
-                  [ngStyle]="{'background-color': event.color}">
-                </div>
+                <div class="collapsed-event" [ngStyle]="{'background-color': event.color}"></div>
               </ng-template>
 
             </ng-container>

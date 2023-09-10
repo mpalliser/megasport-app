@@ -1,0 +1,7 @@
+<mat-card [ngStyle]="{ 'background-color': event.color }">
+  <b>{{event.activityName + ' - ' + event.duration + 'min'}}</b>
+  <span>{{event.instructor}}</span>
+  <div class="event-description">
+    {{event.room}}
+  </div>
+</mat-card>
