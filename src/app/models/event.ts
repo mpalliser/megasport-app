@@ -14,6 +14,7 @@ interface Places {
 
 interface BookingInfo {
   places: Places;
+  available: boolean;
 }
 
 export interface Event {

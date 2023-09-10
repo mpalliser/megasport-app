@@ -11,12 +11,13 @@
             <ng-container *ngFor="let event of element[day]">
 
               <ng-container *ngIf="!element.collapsed; else collapsed">
-                <!-- expanded events -->
-                <app-card [event]="event"></app-card>
+                <app-card class="pointer" [event]="event" (click)="openDialog(event)"></app-card>
               </ng-container>
-              <!-- collapsed events -->
+
               <ng-template #collapsed>
-                <div class="collapsed-event" [ngStyle]="{'background-color': event.color}"></div>
+                <div (click)="openDialog(event)" class="collapsed-event pointer"
+                  [ngStyle]="{ 'background-color': event.color }">
+                </div>
               </ng-template>
 
             </ng-container>

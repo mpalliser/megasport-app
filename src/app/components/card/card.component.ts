@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common'
-import { Component, Input } from '@angular/core'
+import { Component, Input, inject } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
+import { EventDto } from 'src/app/models/event-dto'
+import { LoaderService } from 'src/app/services/loader.servlce'
 
 @Component({
   standalone: true,
@@ -13,5 +15,15 @@ import { MatCardModule } from '@angular/material/card'
   styleUrls: ['./card.component.sass'],
 })
 export class CardComponent {
-  @Input() event: any
+  @Input() event!: EventDto
+
+  isLoading$ = inject(LoaderService).isLoading.asObservable()
+
+  isLoading = false
+
+  constructor() {
+    this.isLoading$.subscribe((isLoading: boolean) => {
+      this.isLoading = isLoading
+    })
+  }
 }

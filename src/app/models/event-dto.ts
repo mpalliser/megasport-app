@@ -1,6 +1,7 @@
 export interface EventDto {
   hour: Date;
   end: Date;
+  available: boolean;
   start: Date;
   activityName: string;
   color: string;

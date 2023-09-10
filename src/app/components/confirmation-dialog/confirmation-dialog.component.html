@@ -1,0 +1,18 @@
+<h1 mat-dialog-title>Reservar sesión - {{ data.activityName }}</h1>
+<div mat-dialog-content>
+  Monitor - {{ data.instructor }}
+  <br>
+  Total plazas - {{ data.totalPlaces }}
+  <br>
+  Plazas disponibles - {{ data.totalPlaces - data.bookedPlaces }}
+  <br>
+  Sala - {{ data.room }}
+  <br>
+  {{ data.start | date: 'dd-MM-yyyy HH:mm' }}
+  <mat-dialog-actions *ngIf="data.available">
+    <button mat-raised-button [mat-dialog-close]="false">Cancelar</button>
+    <button [disabled]="data.totalPlaces - data.bookedPlaces === 0" color="primary" mat-raised-button
+      [mat-dialog-close]="true" cdkFocusInitial>
+      {{ data.totalPlaces - data.bookedPlaces === 0 ? 'No quedan plazas' : 'Reservar' }}
+    </button>
+  </mat-dialog-actions>

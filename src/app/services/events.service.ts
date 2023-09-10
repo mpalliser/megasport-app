@@ -61,6 +61,16 @@ export class EventsService {
     this.defineEventsByHour(events)
   }
 
+  public inscribe(event: EventDto): Observable<unknown> {
+    const formData = new FormData()
+    formData.append('gym_token', '667be543b02294b7624119adc3a725473df39885')
+    formData.append('booking[event_session_id]', event.sessionId.toString())
+    formData.append('booking[email]', 'mmm.palliser@gmail.com')
+    formData.append('password', '123456789')
+
+    return this.httpClient.post('https://app.gym-up.com/api/v1/bookings', formData)
+  }
+
   public defineEventsByHour(data: EventDto[]): void {
     const eventsByHour: EventDto[][] = this.hoursList
       .map((hour: string) => data.filter((event: EventDto) => event.startTime === hour))
@@ -119,7 +129,7 @@ export class EventsService {
   private defineDataSource(eventsByHour: EventDto[][]): void {
     let dataSource: EventDataSource[] = []
     eventsByHour.forEach((events: EventDto[], index: number) => {
-      const element: EventDataSource = { hour: this.hoursList[index], collapsed: true }
+      const element: EventDataSource = { hour: this.hoursList[index], collapsed: false }
       this.columns.value.filter(column => column !== 'hour').forEach((day: string) => {
         element[day] = events.filter((event: EventDto) => this.datepipe.transform(event.start, 'MM-dd-yyyy') === day)
       })
