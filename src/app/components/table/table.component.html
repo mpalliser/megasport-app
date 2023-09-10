@@ -1,0 +1,46 @@
+<div class="table-container">
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 table">
+
+    <ng-container *ngFor="let day of columns" [matColumnDef]="day" [sticky]="day === 'hour'">
+      <th mat-header-cell *matHeaderCellDef color="primary">
+        {{ day !== 'hour' ? day : (columns[1] | date:'MMMM') }}
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <ng-container *ngIf="day !== 'hour';else hourColumn">
+          <div class="collapsed-container" style="min-width: 243px">
+            <ng-container *ngFor="let event of element[day]">
+
+              <!-- collapsed events -->
+              <ng-container *ngIf="!element.collapsed || !event.collapsed; else collapsed">
+                <mat-card (click)="event.collapsed = true"
+                  [ngStyle]="{ 'background-color': event.color, 'padding': '.5rem' }">
+                  <b>{{event.activityName + ' - ' + event.duration + 'min'}}</b>
+                  <span>{{event.instructor}}</span>
+                  <div class="event-description">
+                    {{event.room}}
+                  </div>
+                </mat-card>
+              </ng-container>
+
+              <!-- expanded events -->
+              <ng-template #collapsed>
+                <div class="collapsed-event" (click)="event.collapsed = false"
+                  [ngStyle]="{'background-color': event.color}">
+                </div>
+              </ng-template>
+
+            </ng-container>
+          </div>
+        </ng-container>
+        <ng-template #hourColumn>
+          <button mat-raised-button (click)="expandCollapse(element)">
+            {{element[day]}}
+          </button>
+        </ng-template>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns"></tr>
+  </table>
+</div>
