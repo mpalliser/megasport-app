@@ -1,18 +1,31 @@
-<h1 mat-dialog-title>Reservar sesión - {{ data.activityName }}</h1>
-<div mat-dialog-content>
-  Monitor - {{ data.instructor }}
+<h1 mat-dialog-title class="is-flex justify-center">Reservar sesión - {{ data.activityName }}</h1>
+
+<mat-dialog-content>
+  <div class="is-flex justify-between">
+    <span>Monitor: {{ data.instructor }}</span>
+    <ng-container *ngIf="data.available; else notAvailable">
+      <span>{{ data.totalPlaces - data.bookedPlaces === 0 ? 'No quedan plazas' : (data.totalPlaces - data.bookedPlaces)
+        +
+        ' plazas disponibles' }}</span>
+    </ng-container>
+    <ng-template #notAvailable>
+      <span>Reservas cerradas</span>
+    </ng-template>
+  </div>
+  <div class="is-flex justify-between">
+    <span>{{ data.room }}</span>
+    <span>{{ data.start | date: 'dd-MM-yyyy HH:mm' }}</span>
+  </div>
   <br>
-  Total plazas - {{ data.totalPlaces }}
-  <br>
-  Plazas disponibles - {{ data.totalPlaces - data.bookedPlaces }}
-  <br>
-  Sala - {{ data.room }}
-  <br>
-  {{ data.start | date: 'dd-MM-yyyy HH:mm' }}
-  <mat-dialog-actions *ngIf="data.available">
-    <button mat-raised-button [mat-dialog-close]="false">Cancelar</button>
-    <button [disabled]="data.totalPlaces - data.bookedPlaces === 0" color="primary" mat-raised-button
-      [mat-dialog-close]="true" cdkFocusInitial>
-      {{ data.totalPlaces - data.bookedPlaces === 0 ? 'No quedan plazas' : 'Reservar' }}
-    </button>
-  </mat-dialog-actions>
+  <mat-form-field appearance="fill" class="full-width" *ngIf="data.available">
+    <input matInput placeholder="Introduce tú email" [formControl]="formControl">
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions style="display:flex; justify-content: center;">
+  <button mat-raised-button mat-dialog-close>Cancelar</button>
+  <button [disabled]="data.totalPlaces - data.bookedPlaces === 0 || formControl.invalid" color="primary"
+    mat-raised-button [mat-dialog-close]="formControl.value">
+    {{ data.totalPlaces - data.bookedPlaces === 0 ? 'No quedan plazas' : 'Reservar' }}
+  </button>
+</mat-dialog-actions>

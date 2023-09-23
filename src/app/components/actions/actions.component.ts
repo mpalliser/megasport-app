@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatInputModule } from '@angular/material/input'
 import { MatSelectModule } from '@angular/material/select'
 import { CookieService } from 'ngx-cookie-service'
+import { Subject, map, takeUntil } from 'rxjs'
 import { Filters } from 'src/app/models/filters'
 import { EventsService } from 'src/app/services/events.service'
 
@@ -26,11 +27,13 @@ import { EventsService } from 'src/app/services/events.service'
   styleUrls: ['./actions.component.sass'],
 })
 export class ActionsComponent {
-  public formGroup: FormGroup | undefined
+  public formGroup!: FormGroup
 
   get filterOptions(): Filters {
     return this.eventsService.filterOptions
   }
+
+  destroy$ = new Subject<void>()
 
   constructor(
     private readonly eventsService: EventsService,
@@ -39,6 +42,11 @@ export class ActionsComponent {
   ) {
     this.getWeekData()
     this.initForm()
+  }
+
+  OnDestroy(): void {
+    this.destroy$.next()
+    this.destroy$.complete()
   }
 
   public getWeekData(isNextWeek = false): void {
@@ -51,10 +59,23 @@ export class ActionsComponent {
       rooms: [this.eventsService.selectedFilters.rooms],
     })
 
-    this.formGroup.valueChanges.subscribe((value: Filters) => {
-      this.cookieService.set('filters', JSON.stringify(value))
-      this.eventsService.selectedFilters = value
-      this.eventsService.applyfilters(value)
-    })
+    this.formGroup.valueChanges
+      .pipe(takeUntil(this.destroy$), map((value: Filters) => this.avoidNullValues(value)))
+      .subscribe((value: Filters) => {
+        this.cookieService.set('filters', JSON.stringify(value))
+        this.eventsService.selectedFilters = value
+        this.eventsService.applyfilters(value)
+      })
+  }
+
+  private avoidNullValues(value: Filters): Filters {
+    const filter = { activities: value.activities, rooms: value.rooms }
+    if (filter.activities === null) {
+      filter.activities = []
+    }
+    if (filter.rooms === null) {
+      filter.rooms = []
+    }
+    return filter
   }
 }

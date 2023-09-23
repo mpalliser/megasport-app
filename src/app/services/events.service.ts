@@ -7,11 +7,12 @@ import {
   Observable, ReplaySubject,
   map, tap,
 } from 'rxjs'
+import { getMondayOfWeek, getSundayOfWeek, gmtFormat } from 'src/app/consts/date'
+import { eventToDto } from '../converters/converters'
 import { Event } from '../models/event'
 import { EventDataSource } from '../models/event-data-source'
 import { EventDto } from '../models/event-dto'
 import { Filters } from '../models/filters'
-import { eventToDto } from '../converters/converters'
 
 // TODO: en modo movil, mostrar solo una column
 // arriba debe haber un carrousel con los días
@@ -42,12 +43,8 @@ export class EventsService {
     }
   }
 
-  public getWeekData(nextWeek = false): void {
-    if (nextWeek) {
-      this.getNextWeekData().subscribe()
-    } else {
-      this.getData().subscribe()
-    }
+  public getWeekData(isNextWeek = false): void {
+    this.getData(isNextWeek).subscribe()
   }
 
   public applyfilters({ activities, rooms }: Filters): void {
@@ -61,11 +58,11 @@ export class EventsService {
     this.defineEventsByHour(events)
   }
 
-  public inscribe(event: EventDto): Observable<unknown> {
+  public inscribe(event: EventDto, email: string): Observable<unknown> {
     const formData = new FormData()
     formData.append('gym_token', '667be543b02294b7624119adc3a725473df39885')
     formData.append('booking[event_session_id]', event.sessionId.toString())
-    formData.append('booking[email]', 'mmm.palliser@gmail.com')
+    formData.append('booking[email]', email)
     formData.append('password', '123456789')
 
     return this.httpClient.post('https://app.gym-up.com/api/v1/bookings', formData)
@@ -77,20 +74,6 @@ export class EventsService {
     this.defineDataSource(eventsByHour)
   }
 
-  public getNextWeekData(): Observable<EventDto[]> {
-    return this.httpClient.get<Event[]>('/events/next')
-      .pipe(
-        map((events: Event[]) => events.map((event: Event) => eventToDto(event))),
-        tap((events: EventDto[]) => {
-          this.setData(events)
-          this.setFilterOptions(events)
-          this.defineHoursList(events)
-          this.defineDayColumns(events)
-          this.applyfilters(this.selectedFilters)
-        }),
-      )
-  }
-
   private setFilterOptions(events: EventDto[]): void {
     if (this.filterOptions) {
       this.filterOptions = {
@@ -100,10 +83,10 @@ export class EventsService {
     }
   }
 
-  private getData(): Observable<EventDto[]> {
-    return this.httpClient.get<Event[]>('/events/now')
+  private getData(isNextWeek: boolean): Observable<EventDto[]> {
+    return this.httpClient.get<{ events: Event[] }>(this.dataUrl(isNextWeek))
       .pipe(
-        map((events: Event[]) => events.map((event: Event) => eventToDto(event))),
+        map(({ events }) => events.map((event: Event) => eventToDto(event))),
         tap((events: EventDto[]) => {
           this.setData(events)
           this.setFilterOptions(events)
@@ -112,6 +95,15 @@ export class EventsService {
           this.applyfilters(this.selectedFilters)
         }),
       )
+  }
+
+  private dataUrl(isNextWeek = false): string {
+    const url = 'https://app.gym-up.com/ws/v2/event_sessions_public/667be543b02294b7624119adc3a725473df39885'
+    const date = new Date()
+    if (isNextWeek) {
+      date.setDate(date.getDate() + 7)
+    }
+    return `${url}/timetable?start=${gmtFormat(getMondayOfWeek(date))}&end=${gmtFormat(getSundayOfWeek(date))}`
   }
 
   private setData(events: EventDto[]): void {
