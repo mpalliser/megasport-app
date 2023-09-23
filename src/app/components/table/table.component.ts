@@ -6,7 +6,7 @@ import { MatCardModule } from '@angular/material/card'
 import { MatDialog, MatDialogModule } from '@angular/material/dialog'
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatTableModule } from '@angular/material/table'
-import { filter } from 'rxjs'
+import { filter, switchMap } from 'rxjs'
 import { CardComponent } from 'src/app/components/card/card.component'
 import { ConfirmationDialogComponent } from 'src/app/components/confirmation-dialog/confirmation-dialog.component'
 import { EventDataSource } from 'src/app/models/event-data-source'
@@ -52,12 +52,12 @@ export class TableComponent {
     const dialog = this.dialog.open(ConfirmationDialogComponent, { data })
 
     dialog.afterClosed()
-      .pipe(filter(userEmail => userEmail))
-      .subscribe((userEmail: string) => {
-        this.eventService.inscribe(data, userEmail).subscribe({
-          next: () => this.snackBar.open('Reservado', '', { duration: 2000 }),
-          error: (error: HttpErrorResponse) => this.snackBar.open(error.error.errors, 'Cerrar', { duration: 5000 }),
-        })
+      .pipe(
+        filter(userEmail => userEmail),
+        switchMap((userEmail: string) => this.eventService.inscribe(data, userEmail)),
+      ).subscribe({
+        next: () => this.snackBar.open('Reservada creada, recibirá un correo de confirmación', 'Cerrar', { duration: 2000 }),
+        error: (error: HttpErrorResponse) => this.snackBar.open(error.error.errors, 'Cerrar', { duration: 5000 }),
       })
   }
 

@@ -1,13 +1,10 @@
 <h1 mat-dialog-title class="is-flex justify-center">{{ data.activityName }}</h1>
-
 <mat-dialog-content>
   <span>Monitor: {{ data.instructor }}</span>
   <br>
   <span>{{ data.room }}</span>
   <br>
   <span>{{ data.start | date: 'dd-MM-yyyy HH:mm' }}</span>
-  <br>
-  <br>
   <ng-container *ngIf="data.available; else notAvailable">
     <p>{{ data.totalPlaces - data.bookedPlaces === 0 ? 'No quedan plazas' : (data.totalPlaces - data.bookedPlaces)
       +
