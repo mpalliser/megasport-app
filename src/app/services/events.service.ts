@@ -47,17 +47,6 @@ export class EventsService {
     this.getData(isNextWeek).subscribe()
   }
 
-  public applyfilters({ activities, rooms }: Filters): void {
-    const events = this.data.filter((event: EventDto) => {
-      const emptyFilters = activities?.length === 0 && rooms?.length === 0
-      const matchActivity = activities?.includes(event.activityName)
-      const matchRoom = rooms?.includes(event.room)
-      return emptyFilters || matchActivity || matchRoom
-    })
-
-    this.defineEventsByHour(events)
-  }
-
   public inscribe(event: EventDto, email: string): Observable<unknown> {
     const formData = new FormData()
     formData.append('gym_token', '667be543b02294b7624119adc3a725473df39885')
@@ -68,18 +57,41 @@ export class EventsService {
     return this.httpClient.post('https://app.gym-up.com/api/v1/bookings', formData)
   }
 
-  public defineEventsByHour(data: EventDto[]): void {
-    const eventsByHour: EventDto[][] = this.hoursList
-      .map((hour: string) => data.filter((event: EventDto) => event.startTime === hour))
-    this.defineDataSource(eventsByHour)
+  public applyfilters({ activities, rooms }: Filters): void {
+    const events = this.data.filter((event: EventDto) => {
+      const emptyFilters = activities?.length === 0 && rooms?.length === 0
+      const matchActivity = activities?.includes(event.activityName)
+      const matchRoom = rooms?.includes(event.room)
+      return emptyFilters || matchActivity || matchRoom
+    })
+
+    this.defineDataSource(events)
   }
 
-  private setFilterOptions(events: EventDto[]): void {
-    if (this.filterOptions) {
-      this.filterOptions = {
-        activities: [...new Set(events.map((event: EventDto) => event.activityName).sort())],
-        rooms: [...new Set(events.map((event: EventDto) => event.room).sort())],
-      }
+  private defineDataSource(data: EventDto[]): void {
+    const eventsByHour: EventDto[][] = this.hoursList
+      .map((hour: string) => data.filter((event: EventDto) => event.startTime === hour))
+
+    this.dataSourceSubject.next(this.generateEvents(eventsByHour))
+  }
+
+  private generateEvents(eventsByHour: EventDto[][]): EventDataSource[] {
+    return eventsByHour.map((events: EventDto[], index: number) => ({
+      hour: this.hoursList[index],
+      collapsed: false,
+      ...this.columns.value
+        .filter(column => column !== 'hour')
+        .reduce((accumulator: { [key: string]: EventDto[] }, day: string) => {
+          accumulator[day] = events.filter((event: EventDto) => this.datepipe.transform(event.start, 'MM-dd-yyyy') === day)
+          return accumulator
+        }, {}),
+    }))
+  }
+
+  private generateFilters(events: EventDto[]): void {
+    this.filterOptions = {
+      activities: [...new Set(events.map((event: EventDto) => event.activityName).sort())],
+      rooms: [...new Set(events.map((event: EventDto) => event.room).sort())],
     }
   }
 
@@ -89,9 +101,9 @@ export class EventsService {
         map(({ events }) => events.map((event: Event) => eventToDto(event))),
         tap((events: EventDto[]) => {
           this.setData(events)
-          this.setFilterOptions(events)
-          this.defineHoursList(events)
-          this.defineDayColumns(events)
+          this.generateFilters(events)
+          this.generateHours(events)
+          this.generateColumns(events)
           this.applyfilters(this.selectedFilters)
         }),
       )
@@ -110,7 +122,7 @@ export class EventsService {
     this.data = events
   }
 
-  private defineDayColumns(events: EventDto[]): void {
+  private generateColumns(events: EventDto[]): void {
     const daySet = new Set<string>()
     events
       .filter(() => daySet.size < 7)
@@ -118,20 +130,7 @@ export class EventsService {
     this.columns.next(['hour', ...daySet.values()])
   }
 
-  private defineDataSource(eventsByHour: EventDto[][]): void {
-    let dataSource: EventDataSource[] = []
-    eventsByHour.forEach((events: EventDto[], index: number) => {
-      const element: EventDataSource = { hour: this.hoursList[index], collapsed: false }
-      this.columns.value.filter(column => column !== 'hour').forEach((day: string) => {
-        element[day] = events.filter((event: EventDto) => this.datepipe.transform(event.start, 'MM-dd-yyyy') === day)
-      })
-      dataSource = [...dataSource, element]
-    })
-
-    this.dataSourceSubject.next(dataSource)
-  }
-
-  private defineHoursList(events: EventDto[]): void {
+  private generateHours(events: EventDto[]): void {
     if (!this.hoursList.length) {
       const hourSet = new Set<string>()
       events.forEach((event: EventDto) => hourSet.add(event.startTime))
