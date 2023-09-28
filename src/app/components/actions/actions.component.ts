@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input'
 import { MatSelectModule } from '@angular/material/select'
 import { CookieService } from 'ngx-cookie-service'
 import { Subject, map, takeUntil } from 'rxjs'
+import { YEAR } from 'src/app/consts/date'
 import { Filters } from 'src/app/models/filters'
 import { EventsService } from 'src/app/services/events.service'
 
@@ -62,7 +63,7 @@ export class ActionsComponent {
     this.formGroup.valueChanges
       .pipe(takeUntil(this.destroy$), map((value: Filters) => this.avoidNullValues(value)))
       .subscribe((value: Filters) => {
-        this.cookieService.set('filters', JSON.stringify(value))
+        this.cookieService.set('filters', JSON.stringify(value), YEAR)
         this.eventsService.selectedFilters = value
         this.eventsService.applyfilters(value)
       })

@@ -15,3 +15,5 @@ export function getSundayOfWeek(date: Date): Date {
 export function gmtFormat(date: Date): number {
   return Math.floor(date.getTime() / 1000)
 }
+
+export const YEAR = 365
