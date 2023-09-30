@@ -41,17 +41,12 @@ export class ActionsComponent {
     private readonly formBuilder: FormBuilder,
     private readonly cookieService: CookieService,
   ) {
-    this.getWeekData()
     this.initForm()
   }
 
   OnDestroy(): void {
     this.destroy$.next()
     this.destroy$.complete()
-  }
-
-  public getWeekData(isNextWeek = false): void {
-    this.eventsService.getWeekData(isNextWeek)
   }
 
   private initForm(): void {
@@ -61,12 +56,16 @@ export class ActionsComponent {
     })
 
     this.formGroup.valueChanges
-      .pipe(takeUntil(this.destroy$), map((value: Filters) => this.avoidNullValues(value)))
-      .subscribe((value: Filters) => {
-        this.cookieService.set('filters', JSON.stringify(value), YEAR)
-        this.eventsService.selectedFilters = value
-        this.eventsService.applyfilters(value)
-      })
+      .pipe(
+        takeUntil(this.destroy$),
+        map((value: Filters) => this.avoidNullValues(value)),
+      ).subscribe((value: Filters) => this.onFilterChanges(value))
+  }
+
+  private onFilterChanges(value: Filters): void {
+    this.cookieService.set('filters', JSON.stringify(value), YEAR)
+    this.eventsService.selectedFilters = value
+    this.eventsService.applyfilters(value)
   }
 
   private avoidNullValues(value: Filters): Filters {
