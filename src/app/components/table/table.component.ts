@@ -36,6 +36,10 @@ export class TableComponent {
     private snackBar: MatSnackBar,
   ) {}
 
+  get today(): Date {
+    return new Date()
+  }
+
   get dataSource(): Observable<EventDataSource[]> {
     return this.eventService.dataSource$
   }

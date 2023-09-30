@@ -3,7 +3,7 @@
 
     <ng-container *ngFor="let day of columns | async" [matColumnDef]="day" [sticky]="day === 'hour'">
       <th mat-header-cell *matHeaderCellDef color="primary">
-        {{ (day !== 'hour' ? (day | date: 'EEEE dd') : (day | date: 'MMMM')) | titlecase }}
+        {{ (day !== 'hour' ? (day | date: 'EEEE, dd') : (today | date: 'MMMM')) | titlecase }}
       </th>
       <td mat-cell *matCellDef="let element">
         <ng-container *ngIf="day !== 'hour';else hourColumn">
