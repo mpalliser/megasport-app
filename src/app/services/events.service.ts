@@ -1,10 +1,11 @@
-import { DatePipe } from '@angular/common'
+import { DatePipe, formatDate } from '@angular/common'
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { CookieService } from 'ngx-cookie-service'
 import {
   BehaviorSubject,
   Observable, ReplaySubject,
+  forkJoin,
   map, tap,
 } from 'rxjs'
 import { getMondayOfWeek, getSundayOfWeek, gmtFormat } from 'src/app/consts/date'
@@ -14,8 +15,6 @@ import { EventDataSource } from '../models/event-data-source'
 import { EventDto } from '../models/event-dto'
 import { Filters } from '../models/filters'
 
-// TODO: en modo movil, mostrar solo una column
-// arriba debe haber un carrousel con los días
 @Injectable({
   providedIn: 'root',
 })
@@ -32,6 +31,8 @@ export class EventsService {
 
   private dataSourceSubject = new ReplaySubject<EventDataSource[]>(1)
 
+  private today = this.formatDate(new Date())
+
   get dataSource$(): Observable<EventDataSource[]> {
     return this.dataSourceSubject.asObservable()
   }
@@ -45,10 +46,8 @@ export class EventsService {
     if (filters) {
       this.selectedFilters = JSON.parse(filters)
     }
-  }
 
-  public getWeekData(isNextWeek = false): void {
-    this.getData(isNextWeek).subscribe()
+    this.getData().subscribe()
   }
 
   public inscribe(event: EventDto, email: string): Observable<unknown> {
@@ -83,10 +82,24 @@ export class EventsService {
   }
 
   private fullHoursList(data: EventDto[]): string[] {
+    const twoDaysMore = this.lastDayToPrint()
     const hourSet = new Set<string>()
-    data.forEach((event: EventDto) => hourSet.add(event.startTime))
+    data
+      .filter(({ start }) => this.formatDate(start) >= this.today && this.formatDate(start) < twoDaysMore)
+      .forEach((event: EventDto) => hourSet.add(event.startTime))
     const allHours = [...hourSet.values()].sort()
     return allHours
+  }
+
+  private lastDayToPrint(): string {
+    const lastDate = new Date()
+    lastDate.setDate(new Date().getDate() + 2)
+    const twoDaysMore = this.formatDate(lastDate)
+    return twoDaysMore
+  }
+
+  private formatDate(date: Date): string {
+    return formatDate(date, 'MM-dd-yyyy', 'es')
   }
 
   private generateEvents(eventsByHour: EventDto[][]): EventDataSource[] {
@@ -109,17 +122,19 @@ export class EventsService {
     }
   }
 
-  private getData(isNextWeek: boolean): Observable<EventDto[]> {
-    return this.httpClient.get<{ events: Event[] }>(this.dataUrl(isNextWeek))
-      .pipe(
-        map(({ events }) => events.map((event: Event) => eventToDto(event))),
-        tap((events: EventDto[]) => {
-          this.setData(events)
-          this.generateFilters(events)
-          this.generateColumns(events)
-          this.applyfilters(this.selectedFilters)
-        }),
-      )
+  private getData(): Observable<EventDto[]> {
+    return forkJoin([
+      this.httpClient.get<{ events: Event[]}>(this.dataUrl()),
+      this.httpClient.get<{ events: Event[]}>(this.dataUrl(true)),
+    ]).pipe(
+      map((result: { events: Event[]}[]) => [...result[0].events, ...result[1].events].map((event: Event) => eventToDto(event))),
+      tap((events: EventDto[]) => {
+        this.setData(events)
+        this.generateFilters(events)
+        this.generateColumns(events)
+        this.applyfilters(this.selectedFilters)
+      }),
+    )
   }
 
   private dataUrl(isNextWeek = false): string {
@@ -138,8 +153,8 @@ export class EventsService {
   private generateColumns(events: EventDto[]): void {
     const daySet = new Set<string>()
     events
-      .filter(() => daySet.size < 7)
-      .map((event: EventDto) => daySet.add(this.datepipe.transform(event.start, 'MM-dd-yyyy') ?? ''))
-    this.columns.next(['hour', ...daySet.values()])
+      .filter(({ start }) => this.formatDate(start) >= this.today)
+      .map((event: EventDto) => daySet.add(this.formatDate(event.start) ?? ''))
+    this.columns.next(['hour', ...daySet.values()].slice(0, 3))
   }
 }
