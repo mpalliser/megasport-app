@@ -6,7 +6,7 @@ import { MatCardModule } from '@angular/material/card'
 import { MatDialog, MatDialogModule } from '@angular/material/dialog'
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatTableModule } from '@angular/material/table'
-import { filter, switchMap } from 'rxjs'
+import { Observable, filter, switchMap } from 'rxjs'
 import { CardComponent } from 'src/app/components/card/card.component'
 import { ConfirmationDialogComponent } from 'src/app/components/confirmation-dialog/confirmation-dialog.component'
 import { EventDataSource } from 'src/app/models/event-data-source'
@@ -30,22 +30,18 @@ import { EventsService } from 'src/app/services/events.service'
   styleUrls: ['./table.component.sass'],
 })
 export class TableComponent {
-  columns: string[] = []
-
-  dataSource: EventDataSource[] = []
-
   constructor(
     private eventService: EventsService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-  ) {
-    this.eventService.columns.subscribe((columns: string[]) => {
-      this.columns = columns
-    })
+  ) {}
 
-    this.eventService.dataSource$.subscribe((dataSource: EventDataSource[]) => {
-      this.dataSource = dataSource
-    })
+  get dataSource(): Observable<EventDataSource[]> {
+    return this.eventService.dataSource$
+  }
+
+  get columns(): Observable<string[]> {
+    return this.eventService.columns$
   }
 
   public openDialog(data: EventDto): void {
@@ -59,10 +55,5 @@ export class TableComponent {
         next: () => this.snackBar.open('Reservada creada, recibirá un correo de confirmación', 'Cerrar', { duration: 2000 }),
         error: (error: HttpErrorResponse) => this.snackBar.open(error.error.errors, 'Cerrar', { duration: 5000 }),
       })
-  }
-
-  public expandCollapse(element: EventDataSource): void {
-    // eslint-disable-next-line no-param-reassign
-    element.collapsed = !element.collapsed as boolean
   }
 }

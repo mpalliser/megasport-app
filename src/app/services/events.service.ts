@@ -22,11 +22,11 @@ import { Filters } from '../models/filters'
 export class EventsService {
   public hoursList: string[] = []
 
-  public columns = new BehaviorSubject<string[]>([])
-
   public selectedFilters: Filters = { activities: [], rooms: [] }
 
   public filterOptions: Filters = { activities: [], rooms: [] }
+
+  private columns = new BehaviorSubject<string[]>([])
 
   private data: EventDto[] = [] // used for filters
 
@@ -34,6 +34,10 @@ export class EventsService {
 
   get dataSource$(): Observable<EventDataSource[]> {
     return this.dataSourceSubject.asObservable()
+  }
+
+  get columns$(): Observable<string[]> {
+    return this.columns.asObservable()
   }
 
   constructor(private httpClient: HttpClient, public datepipe: DatePipe, private cookieService: CookieService) {
@@ -65,14 +69,24 @@ export class EventsService {
       return emptyFilters || matchActivity || matchRoom
     })
 
-    this.defineDataSource(events)
+    this.defineViewData(events)
   }
 
-  private defineDataSource(data: EventDto[]): void {
-    const eventsByHour: EventDto[][] = this.hoursList
+  private defineViewData(data: EventDto[]): void {
+    const allHours = this.fullHoursList(data)
+    const eventsByHour: EventDto[][] = allHours
       .map((hour: string) => data.filter((event: EventDto) => event.startTime === hour))
+      .filter((event: EventDto[]) => event.length > 0)
 
+    this.hoursList = eventsByHour.map((events: EventDto[]) => events[0].startTime)
     this.dataSourceSubject.next(this.generateEvents(eventsByHour))
+  }
+
+  private fullHoursList(data: EventDto[]): string[] {
+    const hourSet = new Set<string>()
+    data.forEach((event: EventDto) => hourSet.add(event.startTime))
+    const allHours = [...hourSet.values()].sort()
+    return allHours
   }
 
   private generateEvents(eventsByHour: EventDto[][]): EventDataSource[] {
@@ -102,7 +116,6 @@ export class EventsService {
         tap((events: EventDto[]) => {
           this.setData(events)
           this.generateFilters(events)
-          this.generateHours(events)
           this.generateColumns(events)
           this.applyfilters(this.selectedFilters)
         }),
@@ -128,14 +141,5 @@ export class EventsService {
       .filter(() => daySet.size < 7)
       .map((event: EventDto) => daySet.add(this.datepipe.transform(event.start, 'MM-dd-yyyy') ?? ''))
     this.columns.next(['hour', ...daySet.values()])
-  }
-
-  private generateHours(events: EventDto[]): void {
-    if (!this.hoursList.length) {
-      const hourSet = new Set<string>()
-      events.forEach((event: EventDto) => hourSet.add(event.startTime))
-
-      this.hoursList = [...hourSet.values()].sort()
-    }
   }
 }
