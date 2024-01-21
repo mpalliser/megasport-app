@@ -155,6 +155,6 @@ export class EventsService {
     events
       .filter(({ start }) => this.formatDate(start) >= this.today)
       .map((event: EventDto) => daySet.add(this.formatDate(event.start) ?? ''))
-    this.columns.next(['hour', ...daySet.values()].slice(0, 3))
+    this.columns.next(['hour', ...daySet.values()].slice(0, 8))
   }
 }
