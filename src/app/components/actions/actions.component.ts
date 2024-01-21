@@ -1,13 +1,18 @@
 import { CommonModule } from '@angular/common'
 import { Component } from '@angular/core'
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms'
+import {
+  FormBuilder, FormControl, FormGroup, ReactiveFormsModule,
+} from '@angular/forms'
 import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatButtonModule } from '@angular/material/button'
 import { MatIconModule } from '@angular/material/icon'
 import { MatInputModule } from '@angular/material/input'
 import { MatSelectModule } from '@angular/material/select'
+import { MatChipsModule } from '@angular/material/chips'
 import { CookieService } from 'ngx-cookie-service'
-import { Subject, map, takeUntil } from 'rxjs'
+import {
+  Observable, Subject, map, of, startWith, takeUntil,
+} from 'rxjs'
 import { YEAR } from 'src/app/consts/date'
 import { Filters } from 'src/app/models/filters'
 import { EventsService } from 'src/app/services/events.service'
@@ -22,6 +27,7 @@ import { EventsService } from 'src/app/services/events.service'
     MatSelectModule,
     MatButtonModule,
     MatAutocompleteModule,
+    MatChipsModule,
   ],
   selector: 'app-actions',
   templateUrl: './actions.component.html',
@@ -34,6 +40,10 @@ export class ActionsComponent {
     return this.eventsService.filterOptions
   }
 
+  public filteredActivities: Observable<string[] | undefined> | undefined = of(this.filterOptions.activities)
+
+  public selectedActivities: string[] = []
+
   destroy$ = new Subject<void>()
 
   constructor(
@@ -42,6 +52,14 @@ export class ActionsComponent {
     private readonly cookieService: CookieService,
   ) {
     this.initForm()
+    this.filteredActivities = this.formGroup.get('activities')?.valueChanges.pipe(
+      startWith(null),
+      map((value: string | null) => (value ? this.filter(value) : this.filterOptions.activities)),
+    )
+  }
+
+  get activitiesControl(): FormControl {
+    return this.formGroup.get('activities') as FormControl
   }
 
   OnDestroy(): void {
@@ -49,13 +67,32 @@ export class ActionsComponent {
     this.destroy$.complete()
   }
 
+  public onUnselectActivity(value: string): void {
+    this.selectedActivities = this.selectedActivities.filter(activity => activity !== value)
+    this.onFilterChanges({ activities: this.selectedActivities, rooms: this.formGroup.get('rooms')?.value })
+  }
+
+  public onSelectActivity(value: string): void {
+    this.selectedActivities = [...this.selectedActivities, value]
+    this.onFilterChanges({ activities: this.selectedActivities, rooms: this.formGroup.get('rooms')?.value })
+    this.activitiesControl.reset()
+  }
+
+  private filter(value: string): string[] {
+    const filterValue = value.toLowerCase()
+
+    return this.filterOptions.activities?.filter(option => option.toLowerCase().includes(filterValue)) ?? []
+  }
+
   private initForm(): void {
     this.formGroup = this.formBuilder.group({
-      activities: [this.eventsService.selectedFilters.activities],
+      activities: [null],
       rooms: [this.eventsService.selectedFilters.rooms],
     })
 
-    this.formGroup.valueChanges
+    this.selectedActivities = this.eventsService.selectedFilters.activities as string[]
+
+    this.formGroup.get('rooms')?.valueChanges
       .pipe(
         takeUntil(this.destroy$),
         map((value: Filters) => this.avoidNullValues(value)),

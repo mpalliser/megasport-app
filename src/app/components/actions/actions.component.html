@@ -1,14 +1,25 @@
 <div *ngIf="formGroup" class="filter-container" [formGroup]="formGroup">
-  <mat-form-field appearance="fill">
+  <mat-form-field appearance="fill" class="test">
     <mat-label>Actividades</mat-label>
-    <mat-select formControlName="activities" multiple>
-      <mat-option *ngFor="let activity of filterOptions.activities" [value]="activity">{{activity}}</mat-option>
-    </mat-select>
+    <mat-chip-grid #chipGrid aria-label="activities selection">
+      <mat-chip-row *ngFor="let activity of selectedActivities">
+        {{ activity }}
+        <button matChipRemove [attr.aria-label]="'remove ' + activity" (click)="onUnselectActivity(activity)">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip-row>
+    </mat-chip-grid>
+    <input type="text" aria-label="text" matInput [formControl]="activitiesControl" [matAutocomplete]="auto"
+      [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
+      (matChipInputTokenEnd)="selectedActivities.push($event.value)">
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelectActivity($event.option.value)">
+      <mat-option *ngFor="let activity of filteredActivities | async" [value]="activity">{{ activity }}</mat-option>
+    </mat-autocomplete>
     <button *ngIf="formGroup.get('activities')?.value?.length" mat-icon-button matSuffix
       (click)="formGroup.get('activities')?.reset()"><mat-icon>close</mat-icon></button>
   </mat-form-field>
 
-  <mat-form-field appearance="fill">
+  <mat-form-field appearance="fill" class="test">
     <mat-label>Salas</mat-label>
     <mat-select formControlName="rooms" multiple>
       <mat-option *ngFor="let rooms of filterOptions.rooms" [value]="rooms">{{rooms}}</mat-option>
