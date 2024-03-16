@@ -1,14 +1,17 @@
-import { CommonModule } from '@angular/common'
+import { NgClass, NgStyle } from '@angular/common'
 import { Component, Input, inject } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
+import { MatIconModule } from '@angular/material/icon'
 import { EventDto } from 'src/app/models/event-dto'
 import { LoaderService } from 'src/app/services/loader.servlce'
 
 @Component({
   standalone: true,
   imports: [
-    CommonModule,
+    NgStyle,
+    NgClass,
     MatCardModule,
+    MatIconModule,
   ],
   selector: 'app-card',
   templateUrl: './card.component.html',

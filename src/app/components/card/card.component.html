@@ -1,13 +1,6 @@
 <mat-card [ngClass]="isLoading ? 'is-loading' : ''" [ngStyle]="{ 'background-color': event.color }">
-  <b>{{event.activityName + ' - ' + event.duration + 'min'}}</b>
-  <span>{{event.instructor}}</span>
-  <div *ngIf="!event.available; else available">
-    Reservas cerradas
-  </div>
-  <ng-template #available>
-    {{ event.totalPlaces - event.bookedPlaces > 0
-    ? 'Plazas disponibles ' + (event.totalPlaces - event.bookedPlaces)
-    : 'No quedan plazas'
-    }}
-  </ng-template>
+  <b>
+    {{event.activityName + ' - ' + event.duration + 'min'}}
+    <mat-icon>{{ event.available ? 'event_available' : 'event_busy'}}</mat-icon>
+  </b>
 </mat-card>
