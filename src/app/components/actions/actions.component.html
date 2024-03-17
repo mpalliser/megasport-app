@@ -1,5 +1,5 @@
 <div *ngIf="formGroup" class="filter-container" [formGroup]="formGroup">
-  <mat-form-field appearance="fill" class="test">
+  <mat-form-field appearance="fill" class="form-field">
     <mat-label>Actividades</mat-label>
     <mat-chip-grid #chipGrid aria-label="activities selection">
       <mat-chip-row *ngFor="let activity of selectedActivities">
@@ -19,7 +19,7 @@
       (click)="formGroup.get('activities')?.reset()"><mat-icon>close</mat-icon></button>
   </mat-form-field>
 
-  <mat-form-field appearance="fill" class="test">
+  <mat-form-field appearance="fill" class="form-field">
     <mat-label>Salas</mat-label>
     <mat-select formControlName="rooms" multiple>
       <mat-option *ngFor="let rooms of filterOptions.rooms" [value]="rooms">{{rooms}}</mat-option>

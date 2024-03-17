@@ -95,24 +95,13 @@ export class ActionsComponent {
     this.formGroup.get('rooms')?.valueChanges
       .pipe(
         takeUntil(this.destroy$),
-        map((value: Filters) => this.avoidNullValues(value)),
-      ).subscribe((value: Filters) => this.onFilterChanges(value))
+        map((rooms: string[]) => (rooms || [])),
+      ).subscribe((rooms: string[]) => this.onFilterChanges({ activities: this.selectedActivities, rooms }))
   }
 
-  private onFilterChanges(value: Filters): void {
-    this.cookieService.set('filters', JSON.stringify(value), YEAR)
-    this.eventsService.selectedFilters = value
-    this.eventsService.applyfilters(value)
-  }
-
-  private avoidNullValues(value: Filters): Filters {
-    const filter = { activities: value.activities, rooms: value.rooms }
-    if (filter.activities === null) {
-      filter.activities = []
-    }
-    if (filter.rooms === null) {
-      filter.rooms = []
-    }
-    return filter
+  private onFilterChanges(filters: Filters): void {
+    this.cookieService.set('filters', JSON.stringify(filters), YEAR)
+    this.eventsService.selectedFilters = filters
+    this.eventsService.applyfilters(filters)
   }
 }
