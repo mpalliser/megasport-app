@@ -1,4 +1,6 @@
-import { NgClass, NgStyle } from '@angular/common'
+import {
+  NgClass, NgIf, NgOptimizedImage, NgStyle,
+} from '@angular/common'
 import { Component, Input, inject } from '@angular/core'
 import { MatCardModule } from '@angular/material/card'
 import { MatIconModule } from '@angular/material/icon'
@@ -10,6 +12,8 @@ import { LoaderService } from 'src/app/services/loader.servlce'
   imports: [
     NgStyle,
     NgClass,
+    NgIf,
+    NgOptimizedImage,
     MatCardModule,
     MatIconModule,
   ],

@@ -1,3 +1,5 @@
+import { Instructor } from 'src/app/models/event'
+
 export interface EventDto {
   hour: Date;
   end: Date;
@@ -9,7 +11,7 @@ export interface EventDto {
   bookedPlaces: number;
   totalPlaces: number;
   startTime: string;
-  instructor: string;
+  instructor: Instructor;
   duration: number;
   sessionId: number;
 }

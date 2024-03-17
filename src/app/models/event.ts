@@ -1,6 +1,7 @@
-interface Instructor {
+export interface Instructor {
   name: string;
   surname: string;
+  avatar: string;
 }
 
 interface Mobile {
