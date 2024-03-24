@@ -1,7 +1,8 @@
+@defer {
 <div class="table-container">
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 table">
-
-    <ng-container *ngFor="let day of columns | async" [matColumnDef]="day" [sticky]="day === 'hour'">
+    @for (day of (columns | async); track day) {
+    <ng-container [matColumnDef]="day" [sticky]="day === 'hour'">
       <th mat-header-cell *matHeaderCellDef color="primary">
         {{ (day !== 'hour' ? (day | date: 'EEEE dd') : (today | date: 'MMMM')) | titlecase }}
       </th>
@@ -19,8 +20,18 @@
         </ng-template>
       </td>
     </ng-container>
+    }
 
     <tr mat-header-row *matHeaderRowDef="(columns | async); sticky: true"></tr>
     <tr mat-row *matRowDef="let row; columns: columns | async"></tr>
   </table>
 </div>
+} @placeholder (minimum 1.5s) {
+<div class="placeholder-container">
+  <div class="placeholder">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+</div>
+}
