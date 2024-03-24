@@ -13,9 +13,12 @@ interface Places {
   total: number;
 }
 
-interface BookingInfo {
+export interface BookingInfo {
   places: Places;
   available: boolean;
+  too_soon: boolean;
+  too_late: boolean;
+  sold_out: boolean;
 }
 
 export interface Event {

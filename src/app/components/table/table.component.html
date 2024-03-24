@@ -7,26 +7,15 @@
       </th>
       <td mat-cell *matCellDef="let element">
         <ng-container *ngIf="day !== 'hour';else hourColumn">
-          <div class="cell-container">
-            <ng-container *ngFor="let event of element[day]">
-
-              <ng-container *ngIf="!element.collapsed; else collapsed">
-                <app-card class="pointer" [event]="event" (click)="openDialog(event)"></app-card>
-              </ng-container>
-
-              <ng-template #collapsed>
-                <div (click)="openDialog(event)" class="collapsed-event pointer"
-                  [ngStyle]="{ 'background-color': event.color }">
-                </div>
-              </ng-template>
-
-            </ng-container>
-          </div>
+          <!-- <div class="cell-container"> -->
+          <app-card *ngFor="let event of element[day]" class="pointer" [event]="event"
+            (click)="openDialog(event)"></app-card>
+          <!-- </div> -->
         </ng-container>
         <ng-template #hourColumn>
-          <button mat-raised-button (click)="element.collapsed = !element.collapsed" style="margin-left:.75rem">
+          <p style="text-align: center">
             {{element[day]}}
-          </button>
+          </p>
         </ng-template>
       </td>
     </ng-container>

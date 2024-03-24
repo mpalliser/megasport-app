@@ -1,25 +1,41 @@
 <h1 mat-dialog-title class="is-flex justify-center">{{ data.activityName }}</h1>
 <mat-dialog-content>
-  <span>Monitor: {{ data.instructor.name + ' ' + data.instructor.surname }}</span>
-  <br>
-  <span>{{ data.room }}</span>
-  <br>
-  <span>{{ data.start | date: 'dd-MM-yyyy HH:mm' }}</span>
-  <ng-container *ngIf="data.available; else notAvailable">
-    <p>{{ data.totalPlaces - data.bookedPlaces === 0 ? 'No quedan plazas' : (data.totalPlaces - data.bookedPlaces)
-      +
-      ' plazas disponibles' }}</p>
-  </ng-container>
-  <ng-template #notAvailable>
-    <span>Reservas cerradas</span>
-  </ng-template>
+  <div>
+    <mat-icon>person</mat-icon>
+    {{ data.instructor.name + ' ' + data.instructor.surname }}
+  </div>
+
+  <div>
+    <mat-icon>pin_drop</mat-icon>
+    {{ data.room }}
+  </div>
+
+  <div>
+    <mat-icon>schedule</mat-icon>
+    {{ data.start | date: 'HH:mm | dd-MM-yyyy' }}
+  </div>
+
+  <div>
+    <mat-icon>free_cancellation</mat-icon>
+    <span *ngIf="data.available; else notAvailable">
+      {{ data.totalPlaces - data.bookedPlaces === 0
+      ? 'No quedan plazas'
+      : (data.totalPlaces - data.bookedPlaces) + ' plazas disponibles' }}
+    </span>
+    <ng-template #notAvailable>
+      <span>Reservas cerradas</span>
+    </ng-template>
+  </div>
+
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
 
   <mat-form-field appearance="fill" class="full-width" *ngIf="data.available">
     <input matInput placeholder="Introduce tú email" [formControl]="formControl">
   </mat-form-field>
-</mat-dialog-content>
 
-<mat-dialog-actions style="display:flex; justify-content: center;">
   <button mat-raised-button mat-dialog-close>Cancelar</button>
   <button [disabled]="data.totalPlaces - data.bookedPlaces === 0 || formControl.invalid" color="primary"
     mat-raised-button [mat-dialog-close]="formControl.value">

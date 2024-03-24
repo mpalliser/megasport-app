@@ -4,6 +4,15 @@
   margin: 4px !important
   color: white
   padding: .5rem
+  flex-direction: row
+  justify-content: space-between
+  align-items: center
+  width: 250px
+  div
+    display: flex
+    align-items: center
+    b
+      margin-left: 4px
 
 .is-loading
   background: #eee
@@ -14,42 +23,9 @@
   color: #c3c3c3
   cursor: wait
 
-b
-  display: flex
-  justify-content: space-between
-  align-items: center
-
-  img
-    border-radius: 5px
-
-  span
-    display: flex
-    align-items: center
+img
+  border-radius: 5px
 
 @keyframes shine
   to
     background-position-x: -200%
-
-@media (min-width: 1281px)
-  .mdc-card
-    width: 15vw
-
-@media (min-width: 1025px) and (max-width: 1280px)
-  .mdc-card
-    width: 20vw
-
-@media (min-width: 768px) and (max-width: 1024px)
-  .mdc-card
-    width: 25vw
-
-@media (min-width: 550px) and (max-width: 767px)
-  .mdc-card
-    width: 40vw
-
-@media (min-width: 480px) and (max-width: 550px)
-  .mdc-card
-    width: 50vw
-
-@media (min-width: 320px) and (max-width: 480px)
-  .mdc-card
-    width: 65vw

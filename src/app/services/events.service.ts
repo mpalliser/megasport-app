@@ -105,7 +105,6 @@ export class EventsService {
   private generateEvents(eventsByHour: EventDto[][]): EventDataSource[] {
     return eventsByHour.map((events: EventDto[], index: number) => ({
       hour: this.hoursList[index],
-      collapsed: false,
       ...this.columns.value
         .filter(column => column !== 'hour')
         .reduce((accumulator: { [key: string]: EventDto[] }, day: string) => {
@@ -124,10 +123,10 @@ export class EventsService {
 
   private getData(): Observable<EventDto[]> {
     return forkJoin([
-      this.httpClient.get<{ events: Event[]}>(this.dataUrl()),
-      this.httpClient.get<{ events: Event[]}>(this.dataUrl(true)),
+      this.httpClient.get<{ events: Event[] }>(this.dataUrl()),
+      this.httpClient.get<{ events: Event[] }>(this.dataUrl(true)),
     ]).pipe(
-      map((result: { events: Event[]}[]) => [...result[0].events, ...result[1].events].map((event: Event) => eventToDto(event))),
+      map((result: { events: Event[] }[]) => [...result[0].events, ...result[1].events].map((event: Event) => eventToDto(event))),
       tap((events: EventDto[]) => {
         this.setData(events)
         this.generateFilters(events)
