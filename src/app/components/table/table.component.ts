@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
-import { Component } from '@angular/core'
+import { Component, inject } from '@angular/core'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
 import { MatDialog, MatDialogModule } from '@angular/material/dialog'
@@ -30,11 +30,11 @@ import { EventsService } from 'src/app/services/events.service'
   styleUrls: ['./table.component.sass'],
 })
 export class TableComponent {
-  constructor(
-    private eventService: EventsService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-  ) {}
+  private eventService = inject(EventsService)
+
+  private dialog = inject(MatDialog)
+
+  private snackBar = inject(MatSnackBar)
 
   get today(): Date {
     return new Date()

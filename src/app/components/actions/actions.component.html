@@ -1,32 +1,42 @@
-<div *ngIf="formGroup" class="filter-container" [formGroup]="formGroup">
+<div class="filter-container" [formGroup]="formGroup">
   <mat-form-field appearance="fill" class="form-field" subscriptSizing="dynamic">
     <mat-label>Actividades</mat-label>
     <mat-chip-grid #chipGrid aria-label="activities selection">
-      <mat-chip-row *ngFor="let activity of selectedActivities">
+      @for (activity of selectedActivities; track activity) {
+      <mat-chip-row>
         {{ activity }}
         <button matChipRemove [attr.aria-label]="'remove ' + activity" (click)="onUnselectActivity(activity)">
           <mat-icon>cancel</mat-icon>
         </button>
       </mat-chip-row>
+      }
     </mat-chip-grid>
     <input type="text" aria-label="text" matInput [formControl]="activitiesControl" [matAutocomplete]="auto"
       [matChipInputFor]="chipGrid" [matAutocomplete]="auto"
       (matChipInputTokenEnd)="selectedActivities.push($event.value)">
     <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelectActivity($event.option.value)">
-      <mat-option *ngFor="let activity of filteredActivities | async" [value]="activity">{{ activity }}</mat-option>
+      @for (activity of filteredActivities(); track activity) {
+      <mat-option [value]="activity">{{ activity }}</mat-option>
+      }
     </mat-autocomplete>
-    <button *ngIf="formGroup.get('activities')?.value?.length" mat-icon-button matSuffix
-      (click)="formGroup.get('activities')?.reset()"><mat-icon>close</mat-icon></button>
+    @if (formGroup.get('activities')?.value?.length) {
+    <button mat-icon-button matSuffix (click)="formGroup.get('activities')?.reset()">
+      <mat-icon>close</mat-icon>
+    </button>
+    }
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="form-field" subscriptSizing="dynamic">
     <mat-label>Salas</mat-label>
     <mat-select formControlName="rooms" multiple>
-      <mat-option *ngFor="let rooms of filterOptions.rooms" [value]="rooms">{{rooms}}</mat-option>
+      @for (room of filterOptions.rooms; track room) {
+      <mat-option [value]="room">{{room}}</mat-option>
+      }
     </mat-select>
-    <button *ngIf="formGroup.get('rooms')?.value?.length" mat-icon-button matIconSuffix
-      (click)="formGroup.get('rooms')?.reset()">
+    @if (formGroup.get('rooms')?.value?.length) {
+    <button mat-icon-button matIconSuffix (click)="formGroup.get('rooms')?.reset()">
       <mat-icon>close</mat-icon>
     </button>
+    }
   </mat-form-field>
 </div>

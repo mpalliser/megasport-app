@@ -7,17 +7,14 @@
         {{ (day !== 'hour' ? (day | date: 'EEEE dd') : (today | date: 'MMMM')) | titlecase }}
       </th>
       <td mat-cell *matCellDef="let element">
-        <ng-container *ngIf="day !== 'hour';else hourColumn">
-          <!-- <div class="cell-container"> -->
-          <app-card *ngFor="let event of element[day]" class="pointer" [event]="event"
-            (click)="openDialog(event)"></app-card>
-          <!-- </div> -->
-        </ng-container>
-        <ng-template #hourColumn>
-          <p style="text-align: center">
-            {{element[day]}}
-          </p>
-        </ng-template>
+        @if (day !== 'hour') {
+        <app-card *ngFor="let event of element[day]" class="pointer" [event]="event"
+          (click)="openDialog(event)"></app-card>
+        } @else {
+        <p style="text-align: center">
+          {{element[day]}}
+        </p>
+        }
       </td>
     </ng-container>
     }

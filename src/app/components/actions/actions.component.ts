@@ -1,17 +1,17 @@
-import { CommonModule } from '@angular/common'
-import { Component } from '@angular/core'
+import { AsyncPipe } from '@angular/common'
+import { Component, inject, signal } from '@angular/core'
 import {
   FormBuilder, FormControl, FormGroup, ReactiveFormsModule,
 } from '@angular/forms'
 import { MatAutocompleteModule } from '@angular/material/autocomplete'
 import { MatButtonModule } from '@angular/material/button'
+import { MatChipsModule } from '@angular/material/chips'
 import { MatIconModule } from '@angular/material/icon'
 import { MatInputModule } from '@angular/material/input'
 import { MatSelectModule } from '@angular/material/select'
-import { MatChipsModule } from '@angular/material/chips'
 import { CookieService } from 'ngx-cookie-service'
 import {
-  Observable, Subject, map, of, startWith, takeUntil,
+  Subject, map, startWith, takeUntil,
 } from 'rxjs'
 import { YEAR } from 'src/app/consts/date'
 import { Filters } from 'src/app/models/filters'
@@ -20,7 +20,6 @@ import { EventsService } from 'src/app/services/events.service'
 @Component({
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatInputModule,
     MatIconModule,
@@ -28,6 +27,7 @@ import { EventsService } from 'src/app/services/events.service'
     MatButtonModule,
     MatAutocompleteModule,
     MatChipsModule,
+    AsyncPipe,
   ],
   selector: 'app-actions',
   templateUrl: './actions.component.html',
@@ -36,26 +36,26 @@ import { EventsService } from 'src/app/services/events.service'
 export class ActionsComponent {
   public formGroup!: FormGroup
 
-  get filterOptions(): Filters {
-    return this.eventsService.filterOptions
+  public filteredActivities = signal(this.filterOptions?.activities)
+
+  private eventsService = inject(EventsService)
+
+  // eslint-disable-next-line @typescript-eslint/member-ordering
+  public selectedActivities: string[] = this.eventsService.selectedFilters.activities as string[]
+
+  private destroy$ = new Subject<void>()
+
+  private formBuilder = inject(FormBuilder)
+
+  private cookieService = inject(CookieService)
+
+  // TODO: split this component in two, one for input
+  constructor() {
+    this.initForm()
   }
 
-  public filteredActivities: Observable<string[] | undefined> | undefined = of(this.filterOptions.activities)
-
-  public selectedActivities: string[] = []
-
-  destroy$ = new Subject<void>()
-
-  constructor(
-    private readonly eventsService: EventsService,
-    private readonly formBuilder: FormBuilder,
-    private readonly cookieService: CookieService,
-  ) {
-    this.initForm()
-    this.filteredActivities = this.formGroup.get('activities')?.valueChanges.pipe(
-      startWith(null),
-      map((value: string | null) => (value ? this.filter(value) : this.filterOptions.activities)),
-    )
+  get filterOptions(): Filters {
+    return this.eventsService?.filterOptions
   }
 
   get activitiesControl(): FormControl {
@@ -90,13 +90,17 @@ export class ActionsComponent {
       rooms: [this.eventsService.selectedFilters.rooms],
     })
 
-    this.selectedActivities = this.eventsService.selectedFilters.activities as string[]
-
     this.formGroup.get('rooms')?.valueChanges
       .pipe(
         takeUntil(this.destroy$),
         map((rooms: string[]) => (rooms || [])),
       ).subscribe((rooms: string[]) => this.onFilterChanges({ activities: this.selectedActivities, rooms }))
+
+    this.formGroup.get('activities')?.valueChanges.pipe(
+      startWith(null),
+      takeUntil(this.destroy$),
+      map((value: string | null) => (value ? this.filter(value) : this.filterOptions.activities)),
+    ).subscribe(activities => this.filteredActivities.set(activities))
   }
 
   private onFilterChanges(filters: Filters): void {

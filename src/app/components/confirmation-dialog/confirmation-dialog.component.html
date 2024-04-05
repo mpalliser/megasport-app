@@ -17,24 +17,26 @@
 
   <div>
     <mat-icon>free_cancellation</mat-icon>
-    <span *ngIf="data.available; else notAvailable">
+    <span>
+      @if (data.available) {
       {{ data.totalPlaces - data.bookedPlaces === 0
       ? 'No quedan plazas'
       : (data.totalPlaces - data.bookedPlaces) + ' plazas disponibles' }}
+      } @else {
+      Reservas cerradas
+      }
     </span>
-    <ng-template #notAvailable>
-      <span>Reservas cerradas</span>
-    </ng-template>
   </div>
 
 
 </mat-dialog-content>
 
 <mat-dialog-actions>
-
-  <mat-form-field appearance="fill" class="full-width" *ngIf="data.available">
+  @if (data.available) {
+  <mat-form-field appearance="fill" class="full-width">
     <input matInput placeholder="Introduce tú email" [formControl]="formControl">
   </mat-form-field>
+  }
 
   <button mat-raised-button mat-dialog-close>Cancelar</button>
   <button [disabled]="data.totalPlaces - data.bookedPlaces === 0 || formControl.invalid" color="primary"

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common'
+import { DatePipe } from '@angular/common'
 import { Component, Inject } from '@angular/core'
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms'
 import { MatButtonModule } from '@angular/material/button'
@@ -11,13 +11,13 @@ import { EventDto } from 'src/app/models/event-dto'
 @Component({
   standalone: true,
   imports: [
-    CommonModule,
     MatButtonModule,
     MatDialogModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    DatePipe,
   ],
   selector: 'app-confirmation-dialog',
   templateUrl: './confirmation-dialog.component.html',

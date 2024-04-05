@@ -1,10 +1,12 @@
-<mat-card [ngClass]="(isLoading$ | async) ? 'is-loading' : ''" [ngStyle]="{ 'background-color': event.color }">
+<mat-card [ngClass]="(isLoading$ | async) ? 'is-loading' : ''" [ngStyle]="{ 'background-color': event()?.color }">
   <div>
-    <img [ngSrc]="event.instructor.avatar" width="32" height="32">
-    <b>{{ event.activityName }}</b>
+    @if (event()?.instructor) { <img [ngSrc]="event()!.instructor.avatar" width="32" height="32"> }
+    <b>{{ event()?.activityName }}</b>
   </div>
-  <mat-icon
-    *ngIf="event.availabilityType !== AVAILABILITY_TYPE_ENUM.TOO_SOON && event.availabilityType !== AVAILABILITY_TYPE_ENUM.TOO_LATE">{{
-    event.available ? 'event_available' :
-    'event_busy'}}</mat-icon>
+  <mat-icon>
+    @if (event()?.availabilityType !== AVAILABILITY_TYPE_ENUM.TOO_SOON
+    && event()?.availabilityType !== AVAILABILITY_TYPE_ENUM.TOO_LATE) {
+    {{ event()?.available ? 'event_available' : 'event_busy'}}
+    }
+  </mat-icon>
 </mat-card>
