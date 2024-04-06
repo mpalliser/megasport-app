@@ -1,19 +1,24 @@
 import { CommonModule } from '@angular/common'
 import { Component } from '@angular/core'
-import { ActionsComponent } from './components/actions/actions.component'
+import { FormActivitiesComponent } from 'src/app/components/form-activities/form-activities.component'
+import { FormRoomsComponent } from 'src/app/components/form-rooms/form-rooms.component'
 import { TableComponent } from './components/table/table.component'
 
 @Component({
   standalone: true,
   imports: [
     CommonModule,
-    ActionsComponent,
     TableComponent,
+    FormActivitiesComponent,
+    FormRoomsComponent,
   ],
   selector: 'app-root',
   template: `
-  <app-actions></app-actions>
+  <section>
+    <app-form-activities/>
+    <app-form-rooms/>
+  </section>
 
   <app-table></app-table>`,
 })
-export class AppComponent {}
+export class AppComponent { }

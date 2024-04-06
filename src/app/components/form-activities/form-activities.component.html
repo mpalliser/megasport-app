@@ -1,0 +1,25 @@
+<mat-form-field appearance="fill" class="full-width" subscriptSizing="dynamic">
+  <mat-label>Actividades</mat-label>
+  <mat-chip-grid #chipGrid aria-label="activities selection">
+    @for (activity of selectedActivities; track activity) {
+    <mat-chip-row>
+      {{ activity }}
+      <button matChipRemove [attr.aria-label]="'remove ' + activity" (click)="onUnselectActivity(activity)">
+        <mat-icon>cancel</mat-icon>
+      </button>
+    </mat-chip-row>
+    }
+  </mat-chip-grid>
+  <input #activitiesInput matInput [formControl]="activitiesFormControl" [matAutocomplete]="auto"
+    [matChipInputFor]="chipGrid">
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelectActivity($event.option.value)">
+    @for (activity of filteredActivities(); track activity) {
+    <mat-option [value]="activity">{{ activity }}</mat-option>
+    }
+  </mat-autocomplete>
+  @if (activitiesFormControl.value) {
+  <button mat-icon-button matSuffix (click)="activitiesFormControl.reset()">
+    <mat-icon>close</mat-icon>
+  </button>
+  }
+</mat-form-field>

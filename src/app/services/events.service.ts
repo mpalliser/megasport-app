@@ -1,6 +1,6 @@
-import { DatePipe, formatDate } from '@angular/common'
+import { formatDate } from '@angular/common'
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { Injectable, inject } from '@angular/core'
 import { CookieService } from 'ngx-cookie-service'
 import {
   BehaviorSubject,
@@ -8,7 +8,9 @@ import {
   forkJoin,
   map, tap,
 } from 'rxjs'
-import { getMondayOfWeek, getSundayOfWeek, gmtFormat } from 'src/app/consts/date'
+import {
+  YEAR, getMondayOfWeek, getSundayOfWeek, gmtFormat,
+} from 'src/app/consts/date'
 import { eventToDto } from '../converters/converters'
 import { Event } from '../models/event'
 import { EventDataSource } from '../models/event-data-source'
@@ -41,13 +43,27 @@ export class EventsService {
     return this.columns.asObservable()
   }
 
-  constructor(private httpClient: HttpClient, public datepipe: DatePipe, private cookieService: CookieService) {
+  private cookieService = inject(CookieService)
+
+  private httpClient = inject(HttpClient)
+
+  constructor() {
     const filters = this.cookieService.get('filters')
     if (filters) {
       this.selectedFilters = JSON.parse(filters)
     }
 
     this.getData().subscribe()
+  }
+
+  public onActivitiesChanges(activities: string[]): void {
+    this.selectedFilters = { ...this.selectedFilters, activities }
+    this.updateFilters()
+  }
+
+  public onRoomChanges(rooms: string[]): void {
+    this.selectedFilters = { ...this.selectedFilters, rooms }
+    this.updateFilters()
   }
 
   public inscribe(event: EventDto, email: string): Observable<unknown> {
@@ -69,6 +85,11 @@ export class EventsService {
     })
 
     this.defineViewData(events)
+  }
+
+  private updateFilters(): void {
+    this.cookieService.set('filters', JSON.stringify(this.selectedFilters), YEAR)
+    this.applyfilters(this.selectedFilters)
   }
 
   private defineViewData(data: EventDto[]): void {
@@ -108,7 +129,7 @@ export class EventsService {
       ...this.columns.value
         .filter(column => column !== 'hour')
         .reduce((accumulator: { [key: string]: EventDto[] }, day: string) => {
-          accumulator[day] = events.filter((event: EventDto) => this.datepipe.transform(event.start, 'MM-dd-yyyy') === day)
+          accumulator[day] = events.filter((event: EventDto) => formatDate(event.start, 'MM-dd-yyyy', 'es_ES') === day) // posibles errores por locale
           return accumulator
         }, {}),
     }))
