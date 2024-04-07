@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 import {
-  Component, ElementRef, OnDestroy, OnInit, ViewChild, inject,
-  signal,
-  viewChild,
+  Component, ElementRef, OnDestroy, OnInit, inject,
+  signal, viewChild,
 } from '@angular/core'
 import { FormControl, ReactiveFormsModule } from '@angular/forms'
 import { MatAutocompleteModule } from '@angular/material/autocomplete'
@@ -60,8 +59,10 @@ export class FormActivitiesComponent implements OnInit, OnDestroy {
   }
 
   public onSelectActivity(value: string): void {
-    this.selectedActivities = [...this.selectedActivities, value]
-    this.eventsService.onActivitiesChanges(this.selectedActivities)
+    if (!this.selectedActivities.includes(value)) {
+      this.selectedActivities = [...this.selectedActivities, value]
+      this.eventsService.onActivitiesChanges(this.selectedActivities)
+    }
     this.activitiesFormControl.reset()
     this.activitiesInput().nativeElement.value = ''
   }

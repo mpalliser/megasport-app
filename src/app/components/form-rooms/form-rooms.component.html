@@ -6,7 +6,7 @@
     }
   </mat-select>
   @if (roomsFormControl.value.length) {
-  <button mat-icon-button matIconSuffix (click)="roomsFormControl.reset()">
+  <button mat-icon-button matIconSuffix (click)="clearValue($event)">
     <mat-icon>close</mat-icon>
   </button>
   }
