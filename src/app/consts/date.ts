@@ -1,3 +1,5 @@
+import { formatDate } from '@angular/common'
+
 export function getMondayOfWeek(date: Date): Date {
   const day = date.getDay()
   const diff = date.getDate() - day + (day === 0 ? -6 : 1)
@@ -17,3 +19,7 @@ export function gmtFormat(date: Date): number {
 }
 
 export const YEAR = 365
+
+export function formatedDate(date: Date): string {
+  return formatDate(date, 'MM-dd-yyyy', 'es')
+}

@@ -1,15 +1,12 @@
-import { formatDate } from '@angular/common'
+/* eslint-disable @typescript-eslint/member-ordering */
 import { HttpClient } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core'
 import { CookieService } from 'ngx-cookie-service'
 import {
-  BehaviorSubject,
-  Observable, ReplaySubject,
-  forkJoin,
-  map, tap,
+  BehaviorSubject, Observable, ReplaySubject, forkJoin, map,
 } from 'rxjs'
 import {
-  YEAR, getMondayOfWeek, getSundayOfWeek, gmtFormat,
+  YEAR, formatedDate, getMondayOfWeek, getSundayOfWeek, gmtFormat,
 } from 'src/app/consts/date'
 import { eventToDto } from '../converters/converters'
 import { Event } from '../models/event'
@@ -21,11 +18,13 @@ import { Filters } from '../models/filters'
   providedIn: 'root',
 })
 export class EventsService {
-  public hoursList: string[] = []
+  private readonly cookieService = inject(CookieService)
 
-  public selectedFilters: Filters = { activities: [], rooms: [] }
+  public selectedFilters: Filters = JSON.parse(this.cookieService.get('filters')) || { activities: [], rooms: [] }
 
   public filterOptions: Filters = { activities: [], rooms: [] }
+
+  public hoursList: string[] = []
 
   private columns = new BehaviorSubject<string[]>([])
 
@@ -33,7 +32,7 @@ export class EventsService {
 
   private dataSourceSubject = new ReplaySubject<EventDataSource[]>(1)
 
-  private today = this.formatDate(new Date())
+  private today = formatedDate(new Date())
 
   get dataSource$(): Observable<EventDataSource[]> {
     return this.dataSourceSubject.asObservable()
@@ -43,27 +42,10 @@ export class EventsService {
     return this.columns.asObservable()
   }
 
-  private cookieService = inject(CookieService)
-
   private httpClient = inject(HttpClient)
 
   constructor() {
-    const filters = this.cookieService.get('filters')
-    if (filters) {
-      this.selectedFilters = JSON.parse(filters)
-    }
-
-    this.getData().subscribe()
-  }
-
-  public onActivitiesChanges(activities: string[]): void {
-    this.selectedFilters = { ...this.selectedFilters, activities }
-    this.updateFilters()
-  }
-
-  public onRoomChanges(rooms: string[]): void {
-    this.selectedFilters = { ...this.selectedFilters, rooms }
-    this.updateFilters()
+    this.getData()
   }
 
   public inscribe(event: EventDto, email: string): Observable<unknown> {
@@ -76,15 +58,31 @@ export class EventsService {
     return this.httpClient.post('https://app.gym-up.com/api/v1/bookings', formData)
   }
 
-  public applyfilters({ activities, rooms }: Filters): void {
-    const events = this.data.filter((event: EventDto) => {
-      const emptyFilters = activities?.length === 0 && rooms?.length === 0
-      const matchActivity = activities?.includes(event.activityName)
-      const matchRoom = rooms?.includes(event.room)
-      return emptyFilters || matchActivity || matchRoom
-    })
+  public onActivitiesChanges(activities: string[]): void {
+    this.selectedFilters = { ...this.selectedFilters, activities }
+    this.updateFilters()
+  }
 
-    this.defineViewData(events)
+  public onRoomChanges(rooms: string[]): void {
+    this.selectedFilters = { ...this.selectedFilters, rooms }
+    this.updateFilters()
+  }
+
+  public applyfilters({ activities, rooms }: Filters): void {
+    const emptyFilters = activities?.length === 0 && rooms?.length === 0
+    const filteredEvents = this.data
+      .filter((event: EventDto) => emptyFilters || activities?.includes(event.activityName) || rooms?.includes(event.room))
+
+    this.applyFiltersToTableData(filteredEvents)
+  }
+
+  private applyFiltersToTableData(data: EventDto[]): void {
+    this.hoursList = this.generateHourList(data)
+    const eventsByHour: EventDto[][] = this.hoursList
+      .map((hour: string) => data.filter((event: EventDto) => event.startTime === hour))
+      .filter((event: EventDto[]) => event.length > 0)
+
+    this.dataSourceSubject.next(this.eventsToDataSource(eventsByHour))
   }
 
   private updateFilters(): void {
@@ -92,44 +90,18 @@ export class EventsService {
     this.applyfilters(this.selectedFilters)
   }
 
-  private defineViewData(data: EventDto[]): void {
-    const allHours = this.fullHoursList(data)
-    const eventsByHour: EventDto[][] = allHours
-      .map((hour: string) => data.filter((event: EventDto) => event.startTime === hour))
-      .filter((event: EventDto[]) => event.length > 0)
-
-    this.hoursList = eventsByHour.map((events: EventDto[]) => events[0].startTime)
-    this.dataSourceSubject.next(this.generateEvents(eventsByHour))
+  private generateHourList(data: EventDto[]): string[] {
+    const hourSet = new Set<string>(data.map((event: EventDto) => event.startTime))
+    return [...hourSet.values()].sort()
   }
 
-  private fullHoursList(data: EventDto[]): string[] {
-    const twoDaysMore = this.lastDayToPrint()
-    const hourSet = new Set<string>()
-    data
-      .filter(({ start }) => this.formatDate(start) >= this.today && this.formatDate(start) < twoDaysMore)
-      .forEach((event: EventDto) => hourSet.add(event.startTime))
-    const allHours = [...hourSet.values()].sort()
-    return allHours
-  }
-
-  private lastDayToPrint(): string {
-    const lastDate = new Date()
-    lastDate.setDate(new Date().getDate() + 2)
-    const twoDaysMore = this.formatDate(lastDate)
-    return twoDaysMore
-  }
-
-  private formatDate(date: Date): string {
-    return formatDate(date, 'MM-dd-yyyy', 'es')
-  }
-
-  private generateEvents(eventsByHour: EventDto[][]): EventDataSource[] {
+  private eventsToDataSource(eventsByHour: EventDto[][]): EventDataSource[] {
     return eventsByHour.map((events: EventDto[], index: number) => ({
       hour: this.hoursList[index],
       ...this.columns.value
         .filter(column => column !== 'hour')
         .reduce((accumulator: { [key: string]: EventDto[] }, day: string) => {
-          accumulator[day] = events.filter((event: EventDto) => formatDate(event.start, 'MM-dd-yyyy', 'es_ES') === day) // posibles errores por locale
+          accumulator[day] = events.filter((event: EventDto) => formatedDate(event.start) === day)
           return accumulator
         }, {}),
     }))
@@ -142,19 +114,18 @@ export class EventsService {
     }
   }
 
-  private getData(): Observable<EventDto[]> {
-    return forkJoin([
+  private getData(): void {
+    forkJoin([
       this.httpClient.get<{ events: Event[] }>(this.dataUrl()),
       this.httpClient.get<{ events: Event[] }>(this.dataUrl(true)),
     ]).pipe(
       map((result: { events: Event[] }[]) => [...result[0].events, ...result[1].events].map((event: Event) => eventToDto(event))),
-      tap((events: EventDto[]) => {
-        this.setData(events)
-        this.generateFilters(events)
-        this.generateColumns(events)
-        this.applyfilters(this.selectedFilters)
-      }),
-    )
+    ).subscribe((events: EventDto[]) => {
+      this.data = events
+      this.generateFilters(events)
+      this.generateColumns(events)
+      this.applyfilters(this.selectedFilters)
+    })
   }
 
   private dataUrl(isNextWeek = false): string {
@@ -166,15 +137,10 @@ export class EventsService {
     return `${url}/timetable?start=${gmtFormat(getMondayOfWeek(date))}&end=${gmtFormat(getSundayOfWeek(date))}`
   }
 
-  private setData(events: EventDto[]): void {
-    this.data = events
-  }
-
   private generateColumns(events: EventDto[]): void {
-    const daySet = new Set<string>()
-    events
-      .filter(({ start }) => this.formatDate(start) >= this.today)
-      .map((event: EventDto) => daySet.add(this.formatDate(event.start) ?? ''))
+    const daySet = new Set<string>(events
+      .filter(({ start }) => formatedDate(start) >= this.today)
+      .map((event: EventDto) => formatedDate(event.start) ?? ''))
     this.columns.next(['hour', ...daySet.values()].slice(0, 8))
   }
 }
