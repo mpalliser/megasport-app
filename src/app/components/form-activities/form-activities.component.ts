@@ -63,6 +63,10 @@ export class FormActivitiesComponent implements OnInit, OnDestroy {
       this.selectedActivities = [...this.selectedActivities, value]
       this.eventsService.onActivitiesChanges(this.selectedActivities)
     }
+    this.clearFormAndViewValue()
+  }
+
+  public clearFormAndViewValue(): void {
     this.activitiesFormControl.reset()
     this.activitiesInput().nativeElement.value = ''
   }
