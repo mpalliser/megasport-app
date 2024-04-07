@@ -1,6 +1,8 @@
 <mat-card [ngClass]="(isLoading$ | async) ? 'is-loading' : ''" [ngStyle]="{ 'background-color': event()?.color }">
   <div>
-    @if (event()?.instructor) { <img [ngSrc]="event()!.instructor.avatar" width="32" height="32"> }
+    @if (event()?.instructor) {
+    <img [ngSrc]="event()!.instructor.avatar" width="32" height="32">
+    }
     <b>{{ event()?.activityName }}</b>
   </div>
   <mat-icon>

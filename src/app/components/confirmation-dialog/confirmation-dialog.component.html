@@ -1,34 +1,35 @@
 <h1 mat-dialog-title class="is-flex justify-center">{{ data.activityName }}</h1>
 <mat-dialog-content>
-  <div>
-    <mat-icon>person</mat-icon>
-    {{ data.instructor.name + ' ' + data.instructor.surname }}
-  </div>
+  <img [ngSrc]="data.instructor.avatar" width="96" height="96">
+  <section>
+    <div>
+      <mat-icon>person</mat-icon>
+      {{ data.instructor.name + ' ' + data.instructor.surname }}
+    </div>
 
-  <div>
-    <mat-icon>pin_drop</mat-icon>
-    {{ data.room }}
-  </div>
+    <div>
+      <mat-icon>pin_drop</mat-icon>
+      {{ data.room }}
+    </div>
 
-  <div>
-    <mat-icon>schedule</mat-icon>
-    {{ data.start | date: 'HH:mm | dd-MM-yyyy' }}
-  </div>
+    <div>
+      <mat-icon>schedule</mat-icon>
+      {{ data.start | date: 'HH:mm | dd-MM-yyyy' }}
+    </div>
 
-  <div>
-    <mat-icon>free_cancellation</mat-icon>
-    <span>
-      @if (data.available) {
-      {{ data.totalPlaces - data.bookedPlaces === 0
-      ? 'No quedan plazas'
-      : (data.totalPlaces - data.bookedPlaces) + ' plazas disponibles' }}
-      } @else {
-      Reservas cerradas
-      }
-    </span>
-  </div>
-
-
+    <div>
+      <mat-icon>free_cancellation</mat-icon>
+      <span>
+        @if (data.available) {
+        {{ data.totalPlaces - data.bookedPlaces === 0
+        ? 'No quedan plazas'
+        : (data.totalPlaces - data.bookedPlaces) + ' plazas disponibles' }}
+        } @else {
+        Reservas cerradas
+        }
+      </span>
+    </div>
+  </section>
 </mat-dialog-content>
 
 <mat-dialog-actions>
