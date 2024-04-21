@@ -20,7 +20,7 @@ import { Filters } from '../models/filters'
 export class EventsService {
   private readonly cookieService = inject(CookieService)
 
-  public selectedFilters: Filters = JSON.parse(this.cookieService.get('filters')) || { activities: [], rooms: [] }
+  public selectedFilters: Filters = this.cookieService?.get('filters') ? JSON.parse(this.cookieService.get('filters')) : { activities: [], rooms: [] }
 
   public filterOptions: Filters = { activities: [], rooms: [] }
 
