@@ -1,4 +1,3 @@
-@defer (when (dataSource | async)?.length) {
 <div class="table-container">
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 table">
     @for (day of (columns | async); track day) {
@@ -23,12 +22,3 @@
     <tr mat-row *matRowDef="let row; columns: columns | async"></tr>
   </table>
 </div>
-} @loading (minimum 0.5s) {
-<div class="placeholder-container">
-  <div class="placeholder">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
-</div>
-}
