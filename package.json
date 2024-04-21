@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "serve dist -s -n -L -p $PORT",
+    "start": "ng serve",
     "dev": "ng serve",
     "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
@@ -25,11 +25,11 @@
     "@angular/router": "^17.3.1",
     "@typescript-eslint/eslint-plugin": "~6.6.0",
     "@typescript-eslint/parser": "~6.6.0",
+    "@vercel/speed-insights": "^1.0.10",
     "eslint-config-airbnb-base": "~15.0.0",
     "eslint-plugin-import": "~2.28.1",
     "ngx-cookie-service": "^17.1.0",
     "rxjs": "~7.8.0",
-    "serve": "^14.2.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.4"
   },
