@@ -32,7 +32,7 @@ export function eventToDto(event: Event): EventDto {
     room: event.room,
     bookedPlaces: event.booking_info?.places.booked,
     available: event.booking_info?.available,
-    availabilityType: findAvailabilityType(event.booking_info),
+    ...event.booking_info && { availabilityType: findAvailabilityType(event.booking_info) },
     totalPlaces: event.booking_info?.places.total,
     startTime: event.mobile?.start_time,
     instructor: event.instructors
