@@ -5,6 +5,26 @@ html, body
   height: 100%
   width: 100%
 
+section
+  padding: 1rem
+
+// form custom styles
+
+.mat-mdc-chip.mat-mdc-standard-chip
+  --mdc-chip-container-height: 24px
+
+app-form-activities
+  .mat-mdc-standard-chip.mdc-evolution-chip--with-trailing-action .mdc-evolution-chip__action--primary
+    padding-left: 8px
+
+  .mat-mdc-standard-chip.mdc-evolution-chip--with-trailing-action .mdc-evolution-chip__action--trailing
+    padding: 0 4px
+
+  .mat-mdc-form-field.no-padding > .mat-mdc-text-field-wrapper
+    margin-bottom: -.8em
+
+// helpers
+
 .pointer
   cursor: pointer
 
@@ -20,8 +40,7 @@ html, body
 .full-width
   width: 100%
 
-section
-  padding: 1rem
+// spinner styles
 
 .spinner-container
   width: 100%
