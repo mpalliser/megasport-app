@@ -20,5 +20,5 @@ export class CardComponent {
 
   public readonly AVAILABILITY_TYPE_ENUM = AvailabilityTypeEnum
 
-  public isLoading$ = inject(LoaderService).isLoading$
+  public readonly isLoading$ = inject(LoaderService).isLoading$
 }

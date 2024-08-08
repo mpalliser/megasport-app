@@ -17,21 +17,22 @@ import { TableComponent } from './components/table/table.component'
   selector: 'app-root',
   template: `
 @defer (when (dataSource | async)?.length) {
-  <section>
-    <app-form-activities/>
-    <app-form-rooms/>
-  </section>
+    <section>
+      <app-form-activities/>
+      <app-form-rooms/>
+    </section>
 
   <app-table></app-table>
 } @loading (minimum 0.5s) {
-  <div class="placeholder-container">
-    <div class="placeholder">
+  <div class="spinner-container">
+    <div class="spinner">
       <div></div>
       <div></div>
       <div></div>
     </div>
   </div>
-}`,
+}
+`,
 })
 export class AppComponent {
   public readonly dataSource = inject(EventsService)?.dataSource$
