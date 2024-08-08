@@ -1,4 +1,4 @@
-<mat-form-field appearance="fill" class="full-width" subscriptSizing="dynamic">
+<mat-form-field class="full-width">
   <mat-label>Actividades</mat-label>
   <mat-chip-grid #chipGrid aria-label="activities selection">
     @for (activity of selectedActivities; track activity) {
@@ -9,9 +9,9 @@
       </button>
     </mat-chip-row>
     }
+    <input #activitiesInput matInput [formControl]="activitiesFormControl" [matAutocomplete]="auto"
+      [matChipInputFor]="chipGrid">
   </mat-chip-grid>
-  <input #activitiesInput matInput [formControl]="activitiesFormControl" [matAutocomplete]="auto"
-    [matChipInputFor]="chipGrid">
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelectActivity($event.option.value)">
     @for (activity of filteredActivities(); track activity) {
     <mat-option [value]="activity">{{ activity }}</mat-option>
